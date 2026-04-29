@@ -3,7 +3,7 @@
 Multi-agent orchestration for differential gene expression pipeline monitoring, built around GenPipes RNA-seq Light (C3G, McGill). Agents are coordinated using Anthropic's Managed Agents framework.
 
 **Author:** Joshua Virani-Wall
-**Contact:** [Add email/GitHub here]
+**Contact:** joshuajamesvw@gmail.com
 
 ---
 
