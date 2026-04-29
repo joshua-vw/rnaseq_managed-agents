@@ -18,6 +18,11 @@ This project investigates how variation in wetlab protocol — RNA extraction me
 ### Prerequisites
 - [Miniconda](https://docs.conda.io/en/latest/miniconda.html) or Anaconda installed
 
+- [Anthropic CLI](https://github.com/anthropics/anthropic-cli) installed via Homebrew:
+```bash
+  brew install anthropics/tap/ant
+```
+
 ### Create the conda environment
 ```bash
 conda env create -f environment.yml
