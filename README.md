@@ -233,6 +233,6 @@ seqtk sample -s42 wold_caltech/raw_data/R2/ENCFF001RVW.fastq.gz 3000000 | gzip >
 Sanity check — read counts should match exactly between R1 and R2 for each pair:
 
 ```bash
-zcat gingeras_cshl/raw_data/R1/ENCFF001REK_3M.fastq.gz | echo "R1: $(($(wc -l)/4)) reads"
-zcat gingeras_cshl/raw_data/R2/ENCFF001REJ_3M.fastq.gz | echo "R2: $(($(wc -l)/4)) reads"
+gzcat gingeras_cshl/raw_data/R1/ENCFF001REK_3M.fastq.gz | wc -l | awk '{print "R1: " $1/4 " reads"}'
+gzcat gingeras_cshl/raw_data/R2/ENCFF001REJ_3M.fastq.gz | wc -l | awk '{print "R2: " $1/4 " reads"}'
 ```
