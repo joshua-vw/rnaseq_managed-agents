@@ -1,4 +1,3 @@
-
 # RNA-seq Managed Agents
 
 Multi-agent orchestration for differential gene expression pipeline monitoring, built around GenPipes RNA-seq Light (C3G, McGill). Agents are coordinated using Anthropic's Managed Agents framework.
@@ -11,6 +10,24 @@ Multi-agent orchestration for differential gene expression pipeline monitoring, 
 ## Project Overview
 
 This project investigates how variation in wetlab protocol — RNA extraction method, library fragmentation, and sequencing platform — propagates into systematic gene expression differences. It uses publicly available ENCODE RNA-seq data from the GM12878 human cell line, where the same biological sample was independently processed by two labs using distinct protocols (Gingeras/CSHL and Wold/Caltech).
+
+---
+
+## Platform Notes
+
+This project was developed and tested on the following system. Several setup steps — Homebrew installs, macFUSE, and Docker Desktop — are macOS-specific. Linux users should refer to the official docs for each tool. The Python/conda environment, Anthropic API setup, and GenPipes pipeline steps are platform-independent.
+
+| Component | Version |
+|---|---|
+| Hardware | MacBook Pro 14-inch, Nov 2024, Apple M4 Max |
+| macOS | Sequoia 15.7.3 |
+| Homebrew | 5.1.9 |
+| Docker Desktop | 4.71.0 |
+| macFUSE | 5.2.0 |
+| seqtk | 1.5 |
+| GenPipes (container) | 6.1.1 |
+| Python | 3.11.15 |
+| anthropic SDK | 0.97.0 |
 
 ---
 
