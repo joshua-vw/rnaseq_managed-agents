@@ -1,35 +1,67 @@
+"""
+setup.py — Register all Managed Agents and create the shared Environment.
+
+Run once before using any session scripts. Persists agent/environment IDs
+to agent_config.json (gitignored).
+
+To add a new agent: create agents/<name>_agent.py and import it here.
+"""
+
+import json
+import os
+
 from dotenv import load_dotenv
 import anthropic
-import json
+
+# Import agent definitions
+from agents import readset_agent
 
 load_dotenv()
 
 client = anthropic.Anthropic()
 
-# Create the agent (do this once, save the ID)
-agent = client.beta.agents.create(
-    name="rnaseq-monitor",
-    model="claude-sonnet-4-6",
-    system="You are a helpful assistant monitoring an RNA-seq pipeline.",
-    tools=[{"type": "agent_toolset_20260401"}],
-)
+# ── Agents to register ────────────────────────────────────────────────────────
+# Each entry is a module with NAME, MODEL, TOOLS, and SYSTEM_PROMPT defined.
+AGENT_MODULES = [
+    readset_agent,
+    # design_agent,   ← add here when ready
+    # monitor_agent,
+]
 
-# Create the environment (do this once, save the ID)
+# ── Create environment ────────────────────────────────────────────────────────
+print("Creating Environment...")
 environment = client.beta.environments.create(
     name="rnaseq-env",
     config={"type": "cloud", "networking": {"type": "unrestricted"}},
 )
+print(f"  Environment ID: {environment.id}")
 
-# Save IDs to a file so other scripts can use them
-ids = {
-    "agent_id": agent.id,
-    "agent_version": agent.version,
+# ── Register agents ───────────────────────────────────────────────────────────
+config = {
     "environment_id": environment.id,
+    "environment_name": environment.name,
+    "agents": {},
 }
 
-with open("agent_config.json", "w") as f:
-    json.dump(ids, f, indent=2)
+for module in AGENT_MODULES:
+    print(f"\nCreating agent: {module.NAME}...")
+    agent = client.beta.agents.create(
+        name=module.NAME,
+        model=module.MODEL,
+        system=module.SYSTEM_PROMPT,
+        tools=module.TOOLS,
+    )
+    print(f"  Agent ID: {agent.id}")
+    config["agents"][module.NAME] = {
+        "id": agent.id,
+        "version": agent.version,
+        "name": agent.name,
+    }
 
-print(f"Agent ID: {agent.id}")
-print(f"Environment ID: {environment.id}")
-print("Saved to agent_config.json")
+# ── Write config ──────────────────────────────────────────────────────────────
+config_path = os.path.join(os.path.dirname(__file__), "agent_config.json")
+with open(config_path, "w") as f:
+    json.dump(config, f, indent=2)
+
+print(f"\nConfig written to {config_path}")
+print("Done.")
