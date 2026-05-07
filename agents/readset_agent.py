@@ -127,7 +127,7 @@ Adapter sequences — infer in this order:
       Adapter1: AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
       Adapter2: AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
 
-  3. Note: Trimmomatic can auto-detect adapters even without explicit sequences, so leaving blank is preferable to guessing incorrectly. If the kit is genuinely unknown and cannot be inferred, ask the user rather than defaulting.
+  3. If the kit is genuinely unknown and cannot be inferred, ask the user rather than defaulting.
 
 </inference_rules>
 
