@@ -68,7 +68,6 @@ def read_metadata_file(path: Path) -> str:
     For JSON files, strips large keys that are not useful for readset generation
     to keep the message size within context window limits.
     """
-    # Keys to strip from ENCODE experiment JSONs — large and not needed for readset generation
     ENCODE_KEYS_TO_DROP = {
         "files",           # 864 KB of file download URLs — FASTQ paths come from directory scan
         "analyses",        # processed data references
@@ -90,7 +89,7 @@ def read_metadata_file(path: Path) -> str:
                 if dropped_kb > 1:
                     print(f"  Trimmed {path.name}: removed {dropped_kb:.0f} KB of unused fields.")
             except json.JSONDecodeError:
-                pass  # not valid JSON, send as-is
+                pass
 
         return f"--- Metadata file: {path.name} ---\n{content}\n"
     except Exception as e:
@@ -130,14 +129,18 @@ def extract_tsv(text: str) -> str | None:
     match = re.search(r"```readset\.tsv\s*\n(.*?)```", text, re.DOTALL)
     if match:
         return match.group(1).strip()
-    # Fallback: any TSV-looking fenced block starting with the Sample header
     match = re.search(r"```(?:tsv)?\s*\n(Sample\t.*?)```", text, re.DOTALL)
     if match:
         return match.group(1).strip()
     return None
 
 
-def stream_agent_response(client: anthropic.Anthropic, session_id: str, user_text: str) -> str:
+def stream_agent_response(
+    client: anthropic.Anthropic,
+    session_id: str,
+    user_text: str,
+    seen_event_ids: set,  # persisted across calls — do not reset between turns
+) -> str:
     """Send a user message, poll for events, and return the full response text."""
 
     client.beta.sessions.events.send(
@@ -151,7 +154,6 @@ def stream_agent_response(client: anthropic.Anthropic, session_id: str, user_tex
     )
 
     full_response = ""
-    seen_event_ids = set()
 
     while True:
         response = client.beta.sessions.events.list(
@@ -165,9 +167,9 @@ def stream_agent_response(client: anthropic.Anthropic, session_id: str, user_tex
             if event.id in seen_event_ids:
                 continue
             seen_event_ids.add(event.id)
-            print(f"  [DEBUG] event: {event.type} {event.id}")
+            print(f"  [DEBUG] {event.type} {event.id}")
             if event.type == "session.error":
-                print(f"  [ERROR DETAIL] {event}")
+                print(f"  [ERROR DETAIL] {vars(event)}")
 
             if event.type == "agent.message":
                 for block in event.content:
@@ -274,7 +276,9 @@ def main():
     print("AGENT")
     print("=" * 70)
 
-    full_response = stream_agent_response(client, session.id, initial_message)
+    seen_event_ids: set[str] = set()
+
+    full_response = stream_agent_response(client, session.id, initial_message, seen_event_ids)
     print("\n")
 
     # ── Interactive loop ─────────────────────────────────────────────────────────
@@ -298,7 +302,7 @@ def main():
         print("AGENT")
         print("=" * 70)
 
-        full_response = stream_agent_response(client, session.id, user_input)
+        full_response = stream_agent_response(client, session.id, user_input, seen_event_ids)
         print("\n")
         tsv_content = extract_tsv(full_response)
 
@@ -307,7 +311,6 @@ def main():
         args.output.write_text(tsv_content + "\n", encoding="utf-8")
         print(f"✓ Readset TSV written to {args.output.resolve()}")
 
-        # Quick validation: check column count on first data row
         lines = tsv_content.splitlines()
         if len(lines) >= 2:
             header_cols = lines[0].count("\t") + 1

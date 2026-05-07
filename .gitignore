@@ -4,3 +4,4 @@ wold_caltech/
 .DS_Store
 agent_config.json
 readset.tsv
+__pycache__/

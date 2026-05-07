@@ -23,8 +23,8 @@ Other pipelines (ChIP-Seq, Nanopore, etc.) use different readset formats.
 Tab-separated, one row per readset. Columns must appear in this order:
 
   <column name="Sample" required="mandatory">
-    Identifies the original biological source, not the sequencing library. Multiple Readsets from the same biological sample share the same Sample name, and these Readsets can be spread across Runs and Lanes.
-    Allowed characters: A-Z, numbers 0-9, hyphens (-), underscores (_) only.
+    In GenPipes, the Sample field is the unit of merging and differential expression. Readsets sharing a Sample name are merged before processing and compared as a group in the design file. Conventionally this corresponds to the original biological source, but researchers should define Sample groupings based on what they want to compare — which may not always align with biological source alone.
+    Must contain letters A-Z, numbers 0-9, hyphens (-), underscores (_) only.
   </column>
 
   <column name="Readset" required="mandatory">
@@ -90,6 +90,11 @@ Tab-separated, one row per readset. Columns must appear in this order:
 
 
 <inference_rules>
+
+Sample naming:
+  - The Sample field serves two purposes in GenPipes: (1) readsets sharing a Sample name are merged before processing, and (2) Sample names are used as the unit of comparison in differential expression via the design file.
+  - Ask the user how they want to group readsets into samples before assigning Sample names. Present what you found and ask: "How would you like to group these readsets into samples?"
+  - Do not infer grouping automatically. Always get explicit user input on how to group readsets into samples.
 
 RunType detection:
   - If both an R1 and R2 file exist for the same Readset → PAIRED_END (populate both FASTQ1 and FASTQ2)

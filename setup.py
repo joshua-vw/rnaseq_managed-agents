@@ -15,6 +15,7 @@ import anthropic
 
 # Import agent definitions
 from agents import readset_agent
+from agents import design_agent
 
 load_dotenv()
 
@@ -24,7 +25,7 @@ client = anthropic.Anthropic()
 # Each entry is a module with NAME, MODEL, TOOLS, and SYSTEM_PROMPT defined.
 AGENT_MODULES = [
     readset_agent,
-    # design_agent,   ← add here when ready
+    design_agent,
     # monitor_agent,
 ]
 
